@@ -2,6 +2,7 @@ use nand2vmtranslator::{code_writer, parser};
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
+use std::io::BufWriter;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -11,9 +12,10 @@ fn main() {
     let f = BufReader::new(f);
 
     let mut parser = parser::Parser::new(f);
-    let mut f = BufWriter::new(fs::File::create("Out.asm").unwrap());
-    let mut code_writer = code_writer::CodeWriter { stream: f };
+    let f = BufWriter::new(File::create("Out.asm").unwrap());
+    let mut code_writer = code_writer::CodeWriter::new(f);
 
+    println!("Start translating!");
     loop {
         let bytes = parser.advance();
         if bytes == 0 {
@@ -23,18 +25,23 @@ fn main() {
         if !parser.has_more_commands() {
             continue;
         }
-        println!("line: {}", parser.now_line);
-        println!("command_type: {:?}", parser.command_type());
-        match parser.arg1() {
-            Some(arg) => {
-                println!("arg1: {}", arg);
-                println!("{}", code_writer::write_arithmetic(arg))
+
+        match parser.command_type().unwrap() {
+            parser::CommandType::CArithmetic => {
+                code_writer.write_arithmetic(parser.arg1().unwrap())
             }
-            None => println!("arg1: None"),
-        }
-        match parser.arg2() {
-            Some(arg) => println!("arg2: {}\n", arg),
-            None => println!("arg2: None\n"),
-        }
+            parser::CommandType::CPush => code_writer.write_push_pop(
+                parser::CommandType::CPush,
+                parser.arg1().unwrap(),
+                parser.arg2().unwrap().to_string(),
+            ),
+            parser::CommandType::CPop => code_writer.write_push_pop(
+                parser::CommandType::CPop,
+                parser.arg1().unwrap(),
+                parser.arg2().unwrap().to_string(),
+            ),
+            parser::CommandType::CComment => (),
+        };
     }
+    println!("Finished!")
 }
