@@ -71,6 +71,12 @@ impl CodeWriter {
             }
             CommandType::CComment => (),
             CommandType::CArithmetic => (),
+            CommandType::CGoto => (),
+            CommandType::CLabel => (),
+            CommandType::CIf => (),
+            CommandType::CFunction => (),
+            CommandType::CReturn => (),
+            CommandType::CCall => (),
         }
     }
 

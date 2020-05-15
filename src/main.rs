@@ -41,6 +41,12 @@ fn main() {
                 parser.arg2().unwrap().to_string(),
             ),
             parser::CommandType::CComment => (),
+            parser::CommandType::CLabel => (),
+            parser::CommandType::CGoto => (),
+            parser::CommandType::CIf => (),
+            parser::CommandType::CFunction => (),
+            parser::CommandType::CReturn => (),
+            parser::CommandType::CCall => (),
         };
     }
     println!("Finished!")
