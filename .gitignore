@@ -1,2 +1,4 @@
 /target
 *.asm
+!Sample.asm
+*.vm

@@ -1,4 +1,5 @@
 use nand2vmtranslator::{code_writer, parser};
+use regex::Regex;
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
@@ -12,7 +13,9 @@ fn main() {
     let f = BufReader::new(f);
 
     let mut parser = parser::Parser::new(f);
-    let f = BufWriter::new(File::create("Out.asm").unwrap());
+    let re = Regex::new(r"^(.+)\.vm$").unwrap();
+    let caps = re.captures(input_file_name).unwrap();
+    let f = BufWriter::new(File::create(format!("tmp/{}.asm", caps.at(1).unwrap())).unwrap());
     let mut code_writer = code_writer::CodeWriter::new(f);
 
     println!("Start translating!");
@@ -40,13 +43,13 @@ fn main() {
                 parser.arg1().unwrap(),
                 parser.arg2().unwrap().to_string(),
             ),
-            parser::CommandType::CComment => (),
-            parser::CommandType::CLabel => (),
-            parser::CommandType::CGoto => (),
-            parser::CommandType::CIf => (),
-            parser::CommandType::CFunction => (),
-            parser::CommandType::CReturn => (),
-            parser::CommandType::CCall => (),
+            parser::CommandType::CComment
+            | parser::CommandType::CLabel
+            | parser::CommandType::CGoto
+            | parser::CommandType::CIf
+            | parser::CommandType::CFunction
+            | parser::CommandType::CReturn
+            | parser::CommandType::CCall => (),
         };
     }
     println!("Finished!")
